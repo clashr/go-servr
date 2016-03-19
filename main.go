@@ -22,11 +22,22 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"runtime"
 
 	"github.com/clashr/go-servr/routes"
 )
 
+func init() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+}
+
 func main() {
 	r := routes.Router()
-	log.Fatal(http.ListenAndServe(":8080", r))
+	var port string
+	if port = os.Getenv("PORT"); port == "" {
+		port = "8080"
+	}
+	address := "localhost:" + port
+	log.Fatal(http.ListenAndServe(address, r))
 }
