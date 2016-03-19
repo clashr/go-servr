@@ -22,6 +22,8 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -31,15 +33,13 @@ import (
 )
 
 func ChallengeIndex(w http.ResponseWriter, r *http.Request) {
-	challenges := models.Challenges{
-		models.Challenge{
-			Name: "Unnamed",
-		},
-		models.Challenge{
-			Name: "The Second Unnamed",
-		},
+	challenges := new(models.Challenges)
+	if err := engine.Find(challenges); err != nil {
+		log.Fatalln(err)
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(challenges); err != nil {
 		log.Fatalln(err)
 	}
@@ -48,12 +48,58 @@ func ChallengeIndex(w http.ResponseWriter, r *http.Request) {
 func ChallengeShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	challengeId := vars["challengeId"]
-	fmt.Fprintf(w, "Challenge Show:", challengeId)
+	challenge := new(models.Challenge)
+	exists, err := engine.Id(challengeId).Get(challenge)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			log.Fatalln(err)
+		}
+		return
+	}
+	if !exists {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(challenge); err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func ChallengeCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Not Yet Implemented")
+	var challenge models.Challenge
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		log.Fatalln(err)
+	}
+	if err := json.Unmarshal(body, &challenge); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(422)
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			log.Fatalln(err)
+		}
+		return
+	}
+
+	affected, err := engine.Insert(&challenge)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(affected)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(affected); err != nil {
+		log.Fatalln(err)
+	}
 }
+
 func ChallengeUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	challengeId := vars["challengeId"]

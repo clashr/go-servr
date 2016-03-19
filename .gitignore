@@ -4,6 +4,10 @@
 *.a
 *.so
 
+# Database Files
+database/
+*.db
+
 # Vim Temp Files
 *.swp
 

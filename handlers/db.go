@@ -17,14 +17,26 @@
 // along with Clashr.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-package models
+package handlers
 
-import "time"
+import (
+	"log"
 
-type Challenge struct {
-	Id     int       `json:"id" xorm:"pk autoincr not null"`
-	Name   string    `json:"name" xorm:"unique"`
-	Upload time.Time `json:"upload" xorm:"created"`
+	"github.com/go-xorm/xorm"
+	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/clashr/go-servr/models"
+)
+
+var engine *xorm.Engine
+
+func init() {
+	var err error
+	engine, err = xorm.NewEngine("sqlite3", "./development.db")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if err = engine.Sync(new(models.Challenge)); err != nil {
+		log.Fatalln(err)
+	}
 }
-
-type Challenges []Challenge
