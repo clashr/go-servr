@@ -91,13 +91,9 @@ func ChallengeCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println(affected)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(affected); err != nil {
-		log.Fatalln(err)
-	}
+	target := fmt.Sprintf("/challenges/%d", affected)
+	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 
 func ChallengeUpdate(w http.ResponseWriter, r *http.Request) {
