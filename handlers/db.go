@@ -36,7 +36,7 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	if err = engine.Sync(new(models.Challenge)); err != nil {
+	if err = engine.Sync(new(models.Challenge), new(models.Test)); err != nil {
 		log.Fatalln(err)
 	}
 }
