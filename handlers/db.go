@@ -22,21 +22,16 @@ package handlers
 import (
 	"log"
 
-	"github.com/go-xorm/xorm"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
-
-	"github.com/clashr/go-servr/models"
 )
 
-var engine *xorm.Engine
+var db *sqlx.DB
 
 func init() {
 	var err error
-	engine, err = xorm.NewEngine("sqlite3", "./development.db")
+	db, err = sqlx.Connect("sqlite3", "./development.db")
 	if err != nil {
-		log.Fatalln(err)
-	}
-	if err = engine.Sync(new(models.Challenge), new(models.Test)); err != nil {
 		log.Fatalln(err)
 	}
 }

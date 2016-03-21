@@ -26,7 +26,7 @@ type Challenge struct {
 	Name    string    `json:"name" xorm:"unique"`
 	Details string    `json:"details" xorm:"text"`
 	Tests   []Test    `json:"-" xorm:"-"`
-	Upload  time.Time `json:"upload" xorm:"created"`
+	Upload  time.Time `json:"upload" db:"upload_date"`
 }
 
 type Challenges []Challenge

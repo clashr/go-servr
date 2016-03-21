@@ -20,6 +20,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -32,13 +33,16 @@ import (
 	"github.com/clashr/go-servr/models"
 )
 
+var headerJSON string = "application/json; charset=UTF-8"
+var ct string = "Content-Type"
+
 func ChallengeIndex(w http.ResponseWriter, r *http.Request) {
 	challenges := new(models.Challenges)
-	if err := engine.Find(challenges); err != nil {
+	if err := db.Select(challenges, "SELECT * FROM challenges"); err != nil {
 		log.Fatalln(err)
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set(ct, headerJSON)
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(challenges); err != nil {
 		log.Fatalln(err)
@@ -49,19 +53,21 @@ func ChallengeShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	challengeId := vars["challengeId"]
 	challenge := new(models.Challenge)
-	exists, err := engine.Id(challengeId).Get(challenge)
+	err := db.Get(challenge, "SELECT * FROM challenges WHERE id=$1", challengeId)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusInternalServerError)
-		if err := json.NewEncoder(w).Encode(err); err != nil {
-			log.Fatalln(err)
+		if err == sql.ErrNoRows {
+			w.Header().Set(ct, headerJSON)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		} else {
+			log.Println(err)
+			w.Header().Set(ct, headerJSON)
+			w.WriteHeader(http.StatusInternalServerError)
+			if err := json.NewEncoder(w).Encode(err); err != nil {
+				log.Fatalln(err)
+			}
+			return
 		}
-		return
-	}
-	if !exists {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusNotFound)
-		return
 	}
 
 	if err := json.NewEncoder(w).Encode(challenge); err != nil {
@@ -79,7 +85,7 @@ func ChallengeCreate(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 	if err := json.Unmarshal(body, &challenge); err != nil {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Header().Set(ct, headerJSON)
 		w.WriteHeader(422)
 		if err := json.NewEncoder(w).Encode(err); err != nil {
 			log.Fatalln(err)
@@ -87,12 +93,25 @@ func ChallengeCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	affected, err := engine.Insert(&challenge)
+	stmt, err := db.PrepareNamed("INSERT INTO challenges(name, details) VALUES (:name, :details)")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	res, err := stmt.Exec(challenge)
+	if err != nil {
+		if err.Error() == "UNIQUE constraint failed: challenges.name" {
+			w.Header().Set(ct, headerJSON)
+			w.WriteHeader(http.StatusConflict)
+			if err := json.NewEncoder(w).Encode(err); err != nil {
+				log.Fatalln(err)
+			}
+			return
+		} else {
+			log.Fatalln(err)
+		}
+	}
 
-	target := fmt.Sprintf("/challenges/%d", affected)
+	target := fmt.Sprintf("/challenges/%d", res.LastInsertId)
 	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 
