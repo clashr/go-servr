@@ -22,18 +22,18 @@ package models
 import "time"
 
 type Challenge struct {
-	Id      int       `json:"-" xorm:"pk autoincr not null"`
-	Name    string    `json:"name" xorm:"unique"`
-	Details string    `json:"details" xorm:"text"`
-	Tests   []Test    `json:"-" xorm:"-"`
+	Id      int       `json:"-"`
+	Name    string    `json:"name"`
+	Details string    `json:"details"`
+	Tests   []Test    `json:"-"`
 	Upload  time.Time `json:"upload" db:"upload_date"`
 }
 
 type Challenges []Challenge
 
 type Test struct {
-	Id          int    `xorm: pk autoincr`
-	Input       string `xorm: text`
-	Output      string `xorm: text`
+	Id          int
+	Input       string
+	Output      string
 	ChallengeId int
 }
