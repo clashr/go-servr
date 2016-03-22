@@ -16,5 +16,39 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with Clashr.  If not, see <http://www.gnu.org/licenses/>.
 //
+package routes
 
-package api
+import "github.com/clashr/go-servr/handlers"
+
+var attemptRoutes = Routes{
+	Route{
+		"attemptIndex",
+		"GET",
+		"/challenges/{challengeId}/attempts",
+		handlers.AttemptIndex,
+	},
+	Route{
+		"attemptShow",
+		"GET",
+		"/challenges/{challengeId}/attempts/{attemptId}",
+		handlers.AttemptShow,
+	},
+	Route{
+		"attemptCreate",
+		"POST",
+		"/challenges/{challengeId}/attempts",
+		handlers.AttemptCreate,
+	},
+	Route{
+		"attemptUpdate",
+		"PATCH",
+		"/challenges/{challengeId}/attempts/{attemptId}",
+		handlers.AttemptUpdate,
+	},
+	Route{
+		"attemptDestroy",
+		"DELETE",
+		"/challenges/{challengeId}/attempts/{attemptId}",
+		handlers.AttemptDestroy,
+	},
+}

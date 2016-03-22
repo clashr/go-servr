@@ -32,7 +32,7 @@ type Route struct {
 
 type Routes []Route
 
-var routes = routeCat(indexRoutes, challengeRoutes)
+var routes = routeCat(indexRoutes, attemptRoutes, challengeRoutes)
 
 func routeCat(sources ...Routes) Routes {
 	finalLength := 0

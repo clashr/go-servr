@@ -17,4 +17,19 @@
 // along with Clashr.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-package api
+package models
+
+import "time"
+
+type Attempt struct {
+	Id          int       `json:"-"`
+	Username    string    `json:"username"`
+	Source      string    `json:"source"`
+	Language    string    `json:"language"`
+	Dialect     string    `json:"dialect"`
+	Score       int       `json:"score"`
+	Upload      time.Time `json:"upload" db:"upload_date"`
+	ChallengeId int       `json:"-" db:"challenge_id"`
+}
+
+type Attempts []Attempt
