@@ -33,9 +33,6 @@ import (
 	"github.com/clashr/go-servr/models"
 )
 
-var headerJSON string = "application/json; charset=UTF-8"
-var ct string = "Content-Type"
-
 func ChallengeIndex(w http.ResponseWriter, r *http.Request) {
 	challenges := new(models.Challenges)
 	if err := db.Select(challenges, "SELECT * FROM challenges"); err != nil {
@@ -56,7 +53,7 @@ func ChallengeShow(w http.ResponseWriter, r *http.Request) {
 	err := db.Get(challenge, "SELECT * FROM challenges WHERE id=$1", challengeId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			w.Header().Set(ct, headerJSON)
+			w.Header().Set(ct, headerPLAIN)
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else {
@@ -70,6 +67,8 @@ func ChallengeShow(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set(ct, headerJSON)
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(challenge); err != nil {
 		log.Fatalln(err)
 	}
