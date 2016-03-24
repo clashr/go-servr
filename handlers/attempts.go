@@ -30,6 +30,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/clashr/go-server/modules"
 	"github.com/clashr/go-servr/models"
 )
 
@@ -106,7 +107,10 @@ func AttemptCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	target := fmt.Sprintf("/challenges/%s/attempts/%v", attempt.ChallengeId, id)
+
+	go modules.RunSequence(id)
+
+	target := fmt.Sprintf("/challenges/%s/attempts/%d", attempt.ChallengeId, id)
 	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 

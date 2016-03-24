@@ -20,46 +20,37 @@
 package modules
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/rpc"
 	"time"
-
-	log "github.com/Sirupsen/logrus"
 
 	"github.com/clashr/buildrpcd/api"
 )
 
-func buildr() {
+func buildr(lang, dialect, src string) ([]byte, error) {
 	//make connection to rpc server
 	client, err := rpc.Dial("tcp", ":1234")
 	if err != nil {
-		log.Fatalf("Error in dialing. %s", err)
+		return nil, fmt.Errorf("Error in dialing. %s", err)
 	}
 	//make arguments object
 	args := &api.Args{
-		Language: "c",
-		Dialect:  "ansi",
-		Contents: "#include<stdio.h>\nint main() {\nprintf(\"Hello World\");\nreturn 0; }",
+		Language: lang,
+		Dialect:  dialect,
+		Contents: src,
 	}
 	//this will store returned result
 	var result api.Result
 	//call remote procedure with args
-	log.Printf("%s ", args.Language)
 	err = client.Call("Build.Compile", args, &result)
 	if err != nil {
-		log.Fatalf("error in Build: %v", err)
+		return nil, fmt.Errorf("error in Build: %v", err)
 	}
 	//we got our result in result
-	log.Printf("Language:%s\n %s\nResult: %d", args.Language, args.Contents, len(result.Binary))
+	log.Printf("RPC Recieved: Language:%s\n, args.Language")
+	log.Printf("RPC Recieved: Binary Length:%d\n", len(result.Binary))
 
-	ioutil.WriteFile("a.out", result.Binary, 0755)
-	if err != nil {
-		log.Fatalln("could not write result")
-	}
-	log.Println("Wrote Binary")
-}
-
-func DoesLittle() {
-	time.Sleep(5 * time.Second)
-	log.Println("Finished Does Little")
+	return result.Binary, nil
 }

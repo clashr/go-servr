@@ -24,29 +24,35 @@ import (
 	"log"
 	"net/rpc"
 
+	"github.com/clashr/go-servr/models"
 	"github.com/clashr/judgrpcd/api"
 )
 
-func judgr() {
+func judgr(lang string, bin []byte, tests models.Tests) (int, error) {
 	//make connection to rpc server
 	client, err := rpc.Dial("tcp", ":1234")
 	if err != nil {
-		log.Fatalf("Error in dialing. %s", err)
+		return -1, fmt.Errorf("Error in dialing. %s", err)
 	}
+	testdata := make([]api.Test, len(tests))
+	for i, test := range tests {
+		testdata[i] = api.Test{
+			In: test.Input,
+			Out: test.Output,
+		}
 	//make arguments object
-	bin, err := ioutil.ReadFile("a.out")
+	args := &api.Args{
+		Language: lang,
+		Binary: bin,
+		TestData: tests,
+	}
 
-	tests := make([]api.Test, 1)
-	tests[0] = api.Test{In: "asdf", Out: ""}
-
-	args := &api.Args{Language: "c", Binary: bin, TestData: tests}
 	//this will store returned result
 	var result api.Result
 	//call remote procedure with args
 	if err = client.Call("Judge.Runner", args, &result); err != nil {
-		log.Fatalf("Error in running: %s", err)
+		return -1, fmt.Errorf("Error in running: %s", err)
 	}
-	//Print out the result
-	log.Printf("Mem Used: %dKB\nTime Used: %s\nScore: %d\n", result.Data[0].TotalMem,
-		result.Data[0].TotalTime, result.Score)
+	//return the result
+	return result.Score, nil
 }

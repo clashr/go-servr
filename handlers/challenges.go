@@ -31,7 +31,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/clashr/go-servr/models"
-	"github.com/clashr/go-servr/modules"
 )
 
 func ChallengeIndex(w http.ResponseWriter, r *http.Request) {
@@ -110,8 +109,6 @@ func ChallengeCreate(w http.ResponseWriter, r *http.Request) {
 			log.Fatalln(err)
 		}
 	}
-
-	go modules.DoesLittle()
 
 	id, err := res.LastInsertId()
 	if err != nil {
