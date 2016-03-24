@@ -102,7 +102,11 @@ func AttemptCreate(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 
-	target := fmt.Sprintf("/challenges/%d/attempts/%d", attempt.ChallengeId, res.LastInsertId)
+	id, err := res.LastInsertId()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	target := fmt.Sprintf("/challenges/%s/attempts/%v", attempt.ChallengeId, id)
 	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 
@@ -110,8 +114,8 @@ func AttemptUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	attemptId := vars["attemptId"]
 	challengeId := vars["challengeId"]
-	fmt.Fprintf(w, "Attempt Update: %d\n", attemptId)
-	fmt.Fprintf(w, "For Challenge: %d\n", challengeId)
+	fmt.Fprintf(w, "Attempt Update: %s\n", attemptId)
+	fmt.Fprintf(w, "For Challenge: %s\n", challengeId)
 	fmt.Fprintln(w, "Feature not yet Implemented.")
 }
 
@@ -119,7 +123,7 @@ func AttemptDestroy(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	attemptId := vars["attemptId"]
 	challengeId := vars["challengeId"]
-	fmt.Fprintf(w, "Attempt Destroy: %d\n", attemptId)
-	fmt.Fprintf(w, "For Challenge: %d\n", challengeId)
+	fmt.Fprintf(w, "Attempt Destroy: %s\n", attemptId)
+	fmt.Fprintf(w, "For Challenge: %s\n", challengeId)
 	fmt.Fprintln(w, "Feature not yet Implemented.")
 }

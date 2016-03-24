@@ -17,7 +17,7 @@
 // along with Clashr.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-package main
+package modules
 
 import (
 	"io/ioutil"
@@ -37,9 +37,9 @@ func judgr() {
 	bin, err := ioutil.ReadFile("a.out")
 
 	tests := make([]api.Test, 1)
-	tests[0] = api.Test{"asdf", ""}
+	tests[0] = api.Test{In: "asdf", Out: ""}
 
-	args := &api.Args{"c", bin, tests}
+	args := &api.Args{Language: "c", Binary: bin, TestData: tests}
 	//this will store returned result
 	var result api.Result
 	//call remote procedure with args

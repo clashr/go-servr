@@ -17,11 +17,12 @@
 // along with Clashr.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-package main
+package modules
 
 import (
 	"io/ioutil"
 	"net/rpc"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -46,14 +47,19 @@ func buildr() {
 	log.Printf("%s ", args.Language)
 	err = client.Call("Build.Compile", args, &result)
 	if err != nil {
-		log.Fatalf("error in Build", err)
+		log.Fatalf("error in Build: %v", err)
 	}
 	//we got our result in result
 	log.Printf("Language:%s\n %s\nResult: %d", args.Language, args.Contents, len(result.Binary))
 
 	ioutil.WriteFile("a.out", result.Binary, 0755)
 	if err != nil {
-		log.Fatalf("could not write result")
+		log.Fatalln("could not write result")
 	}
-	log.Printf("Wrote Binary")
+	log.Println("Wrote Binary")
+}
+
+func DoesLittle() {
+	time.Sleep(5 * time.Second)
+	log.Println("Finished Does Little")
 }

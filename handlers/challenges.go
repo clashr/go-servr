@@ -31,6 +31,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/clashr/go-servr/models"
+	"github.com/clashr/go-servr/modules"
 )
 
 func ChallengeIndex(w http.ResponseWriter, r *http.Request) {
@@ -110,18 +111,26 @@ func ChallengeCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	target := fmt.Sprintf("/challenges/%d", res.LastInsertId)
+	go modules.DoesLittle()
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	target := fmt.Sprintf("/challenges/%d", id)
 	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 
 func ChallengeUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	challengeId := vars["challengeId"]
-	fmt.Fprintf(w, "Challenge Update:", challengeId)
+	fmt.Fprintf(w, "Challenge Update: %s", challengeId)
+	fmt.Fprintln(w, "Feature not yet Implemented.")
 }
 
 func ChallengeDestroy(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	challengeId := vars["challengeId"]
-	fmt.Fprintf(w, "Challenge Destroy:", challengeId)
+	fmt.Fprintf(w, "Challenge Destroy: %s", challengeId)
+	fmt.Fprintln(w, "Feature not yet Implemented.")
 }
